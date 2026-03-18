@@ -1,0 +1,106 @@
+{
+  "name": "Lab Intelligence Agent",
+  "description": "Universal health data normalizer and interpreter for functional medicine. Ingests lab results, wearable data, and genomic data from ANY source and format — HL7v2, FHIR, C-CDA, CSV, PDF text, Apple Health, Oura, Withings, Garmin, Fitbit, WHOOP, Dexcom, 23andMe, VCF — normalizes everything to LOINC-coded standards, and interprets through a functional medicine lens with pattern detection, trending, and follow-up recommendations.",
+  "url": "https://lab-intelligence.autopractice.ai",
+  "provider": {
+    "organization": "AutoPractice AI",
+    "url": "https://autopractice.ai"
+  },
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true
+  },
+  "authentication": {
+    "schemes": ["bearer"],
+    "credentials": null
+  },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["text/plain", "application/json"],
+  "skills": [
+    {
+      "id": "universal-ingest",
+      "name": "Universal Health Data Ingestion",
+      "description": "Auto-detect and ingest ANY health data format. Supports 15+ formats including HL7v2, FHIR R4, C-CDA XML, Apple Health XML, Oura/Withings/Garmin/Fitbit/WHOOP/Dexcom wearable data, 23andMe/AncestryDNA/VCF genomic files, Rupa Health labs, CSV exports from any lab company, and raw text from PDFs or screenshots.",
+      "tags": ["ingestion", "normalization", "LOINC", "FHIR", "HL7", "wearable", "genomic"],
+      "examples": [
+        "Here are my patient's lab results from Quest",
+        "Parse this HL7 message from our lab interface",
+        "Import this Apple Health export",
+        "Analyze this 23andMe raw data file",
+        "What format is this data?"
+      ]
+    },
+    {
+      "id": "functional-interpretation",
+      "name": "Functional Medicine Lab Interpretation",
+      "description": "Interpret lab results using functional medicine optimal reference ranges — tighter than conventional ranges to catch dysfunction early. Covers 120+ biomarkers across thyroid, metabolic, lipids, inflammation, iron, nutrients, liver, kidney, CBC, hormones, adrenal, gut, cardiac, autoimmune, and more.",
+      "tags": ["interpretation", "functional-medicine", "reference-ranges", "clinical"],
+      "examples": [
+        "Interpret these thyroid results with functional ranges",
+        "Is this TSH of 3.8 actually optimal?",
+        "Flag anything outside functional medicine ranges",
+        "Compare conventional vs functional interpretation"
+      ]
+    },
+    {
+      "id": "pattern-detection",
+      "name": "Clinical Pattern Recognition",
+      "description": "Detect multi-biomarker clinical patterns: thyroid conversion issues, Hashimoto's, insulin resistance, iron deficiency (with/without anemia), methylation dysfunction, chronic inflammation, HPA axis dysregulation, PCOS, metabolic syndrome, anemia differential, liver dysfunction patterns, and gut-immune axis dysfunction.",
+      "tags": ["pattern-detection", "clinical-reasoning", "multi-marker", "diagnosis-support"],
+      "examples": [
+        "What patterns do you see in these results?",
+        "Is there an insulin resistance pattern here?",
+        "Check for thyroid conversion issues",
+        "Cross-reference these labs for hidden patterns"
+      ]
+    },
+    {
+      "id": "genomic-analysis",
+      "name": "Genomic Variant Analysis",
+      "description": "Parse and interpret consumer genomic data (23andMe, AncestryDNA) and clinical VCF files. Covers 30+ clinically relevant SNPs: MTHFR, COMT, CBS, CYP450 pharmacogenomics, VDR, HFE, APOE, Factor V Leiden, and more. Generates methylation profiles, pharmacogenomic metabolizer status, and lab test recommendations based on variants.",
+      "tags": ["genomics", "pharmacogenomics", "MTHFR", "SNP", "23andMe"],
+      "examples": [
+        "Analyze my 23andMe raw data",
+        "What does my MTHFR status mean for my labs?",
+        "Check for drug metabolism variants",
+        "What labs should I order based on my genetics?"
+      ]
+    },
+    {
+      "id": "trending",
+      "name": "Cross-Source Biomarker Trending",
+      "description": "Track biomarkers over time regardless of which lab, EHR, or device the data came from. Handles mixed sources (Quest via FHIR + Rupa + manual entry) with automatic unit normalization. Detects whether trends are moving toward or away from functional optimal.",
+      "tags": ["trending", "longitudinal", "multi-source", "tracking"],
+      "examples": [
+        "Show me this patient's Vitamin D trend over the last year",
+        "Has their thyroid been improving?",
+        "Compare these two lab panels 6 months apart",
+        "Trend their ferritin from three different lab sources"
+      ]
+    },
+    {
+      "id": "follow-up-recommendations",
+      "name": "Follow-Up Test Recommendations",
+      "description": "Based on current results and detected patterns, suggest additional tests to complete the clinical picture. Uses related-marker cross-references and pattern logic to identify gaps.",
+      "tags": ["recommendations", "follow-up", "test-ordering", "clinical-decision"],
+      "examples": [
+        "What should I order next based on these results?",
+        "We're missing some thyroid markers — which ones?",
+        "What follow-up labs does this pattern suggest?"
+      ]
+    },
+    {
+      "id": "wearable-correlation",
+      "name": "Lab-Wearable Data Correlation",
+      "description": "Correlate wearable device metrics (HRV, sleep, glucose, activity, body composition) with lab results for a holistic health picture. Maps wearable data to LOINC codes where applicable.",
+      "tags": ["wearable", "correlation", "holistic", "sleep", "HRV", "glucose"],
+      "examples": [
+        "Compare their Oura sleep data with their cortisol levels",
+        "Their HRV is declining — what do the labs show?",
+        "Correlate CGM glucose patterns with their HbA1c"
+      ]
+    }
+  ]
+}

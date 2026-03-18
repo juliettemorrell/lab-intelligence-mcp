@@ -1,0 +1,11 @@
+{
+  "data": [
+    {"day":"2026-03-04","total_sleep_duration":25200,"efficiency":78,"deep_sleep_duration":3600,"rem_sleep_duration":5400,"light_sleep_duration":12600,"awake_time":3600,"lowest_heart_rate":58,"average_hrv":32,"latency":1800},
+    {"day":"2026-03-05","total_sleep_duration":23400,"efficiency":74,"deep_sleep_duration":2700,"rem_sleep_duration":4800,"light_sleep_duration":12600,"awake_time":3300,"lowest_heart_rate":61,"average_hrv":28,"latency":2400},
+    {"day":"2026-03-06","total_sleep_duration":27000,"efficiency":82,"deep_sleep_duration":4200,"rem_sleep_duration":6000,"light_sleep_duration":13200,"awake_time":3600,"lowest_heart_rate":56,"average_hrv":35,"latency":1200},
+    {"day":"2026-03-07","total_sleep_duration":21600,"efficiency":71,"deep_sleep_duration":2400,"rem_sleep_duration":4200,"light_sleep_duration":11400,"awake_time":3600,"lowest_heart_rate":63,"average_hrv":25,"latency":3000},
+    {"day":"2026-03-08","total_sleep_duration":24000,"efficiency":76,"deep_sleep_duration":3000,"rem_sleep_duration":5100,"light_sleep_duration":12300,"awake_time":3600,"lowest_heart_rate":60,"average_hrv":29,"latency":2100},
+    {"day":"2026-03-09","total_sleep_duration":28800,"efficiency":85,"deep_sleep_duration":5400,"rem_sleep_duration":6600,"light_sleep_duration":13200,"awake_time":3600,"lowest_heart_rate":54,"average_hrv":38,"latency":900},
+    {"day":"2026-03-10","total_sleep_duration":22800,"efficiency":73,"deep_sleep_duration":2700,"rem_sleep_duration":4500,"light_sleep_duration":12000,"awake_time":3600,"lowest_heart_rate":62,"average_hrv":26,"latency":2700}
+  ]
+}

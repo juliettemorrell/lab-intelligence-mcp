@@ -1,0 +1,25 @@
+{
+  "name": "lab-intelligence-mcp",
+  "version": "1.0.0",
+  "description": "Universal health data normalizer and interpreter for functional medicine. A2A agent with 20 MCP tools. 15+ input formats, 120+ biomarkers, 13 clinical patterns.",
+  "type": "module",
+  "main": "dist/server-http.js",
+  "scripts": {
+    "dev": "npx tsx src/server-http.ts",
+    "dev:stdio": "npx tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/server-http.js",
+    "start:stdio": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^5.1.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

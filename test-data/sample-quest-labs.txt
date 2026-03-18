@@ -1,0 +1,68 @@
+QUEST DIAGNOSTICS - COMPREHENSIVE METABOLIC & THYROID PANEL
+Patient: Sarah Martinez    DOB: 04/15/1985    Sex: F
+Collected: 03/10/2026    Reported: 03/12/2026
+Ordering Provider: Dr. Williams, NMD
+Specimen: Serum, Fasting
+
+Test Name                    Result    Units        Reference Range    Flag
+========================    ======    =========    ===============    ====
+COMPREHENSIVE METABOLIC PANEL
+Glucose                      92        mg/dL        65-99
+BUN                          8         mg/dL        6-20
+Creatinine                   0.7       mg/dL        0.6-1.2
+eGFR                         105       mL/min
+Sodium                       140       mEq/L        136-145
+Potassium                    4.1       mEq/L        3.5-5.0
+CO2                          24        mEq/L        23-29
+Calcium                      9.5       mg/dL        8.5-10.5
+Total Protein                7.2       g/dL         6.0-8.3
+Albumin                      3.8       g/dL         3.5-5.5
+Bilirubin Total              0.6       mg/dL        0.1-1.2
+Alkaline Phosphatase         42        U/L          44-147
+AST                          32        U/L          10-40
+ALT                          38        U/L          7-56
+GGT                          48        U/L          0-65
+
+LIPID PANEL
+Total Cholesterol            215       mg/dL        125-200             H
+HDL Cholesterol              48        mg/dL        >39
+LDL Cholesterol              142       mg/dL        0-130               H
+Triglycerides                125       mg/dL        0-150
+VLDL                         25        mg/dL        5-40
+
+THYROID PANEL
+TSH                          3.8       mIU/L        0.4-4.5
+Free T4                      1.2       ng/dL        0.8-1.8
+Free T3                      2.4       pg/mL        2.3-4.2
+
+IRON PANEL
+Iron                         52        ug/dL        35-175
+TIBC                         410       ug/dL        250-450
+Ferritin                     18        ng/mL        12-150
+Iron Saturation              13        %            15-55               L
+
+INFLAMMATION
+hs-CRP                       2.1       mg/L         0.0-3.0
+Homocysteine                 11.4      umol/L       0-15
+ESR                          18        mm/hr        0-20
+
+DIABETES
+HbA1c                        5.5       %            4.0-5.6
+Fasting Insulin              12.8      uIU/mL       2.6-24.9
+
+VITAMINS & MINERALS
+Vitamin D, 25-OH             28        ng/mL        30-100              L
+Vitamin B12                  310       pg/mL        200-900
+Folate                       6.8       ng/mL        2.7-17.0
+Magnesium                    1.8       mg/dL        1.7-2.2
+
+CBC
+WBC                          5.2       x10^3/uL     4.5-11.0
+RBC                          4.1       x10^6/uL     4.0-5.2
+Hemoglobin                   11.8      g/dL         12.0-16.0           L
+Hematocrit                   35.5      %            36-46               L
+MCV                          86.6      fL           80-100
+MCH                          28.8      pg           27-33
+MCHC                         33.2      g/dL         32-36
+RDW                          14.8      %            11.5-14.5           H
+Platelets                    245       x10^3/uL     150-400
