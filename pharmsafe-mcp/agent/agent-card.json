@@ -1,0 +1,56 @@
+{
+  "name": "PharmSafe",
+  "description": "Medication Safety & Pharmacogenomics Intelligence — checks drug interactions, pharmacogenomic conflicts, polypharmacy risks, renal/hepatic dosing adjustments, allergy cross-reactivity, deprescribing opportunities, and medication reconciliation",
+  "url": "https://pharmsafe-mcp.up.railway.app",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "skills": [
+    {
+      "id": "check-interactions",
+      "name": "Drug Interaction Check",
+      "description": "Analyze a medication list for drug-drug interactions with severity ratings, clinical effects, and evidence-based recommendations",
+      "tags": ["drug-interactions", "safety", "pharmacology"]
+    },
+    {
+      "id": "pharmacogenomics",
+      "name": "Pharmacogenomics Analysis",
+      "description": "Cross-reference medications with patient CYP450 and other pharmacogenomic data to identify drugs requiring dose adjustment or avoidance",
+      "tags": ["pharmacogenomics", "CYP450", "precision-medicine", "CPIC"]
+    },
+    {
+      "id": "renal-hepatic-dosing",
+      "name": "Organ Impairment Dosing",
+      "description": "Flag medications needing dose adjustment for renal impairment (GFR-based) or hepatic impairment (Child-Pugh-based)",
+      "tags": ["renal-dosing", "hepatic-dosing", "organ-impairment"]
+    },
+    {
+      "id": "polypharmacy-assessment",
+      "name": "Polypharmacy Risk Assessment",
+      "description": "Comprehensive safety analysis combining interactions, duplicates, PGx, organ function, allergies, and deprescribing into a scored report",
+      "tags": ["polypharmacy", "medication-safety", "risk-assessment"]
+    },
+    {
+      "id": "medication-reconciliation",
+      "name": "Medication Reconciliation",
+      "description": "Compare two medication lists from different sources to identify discrepancies in drugs and doses",
+      "tags": ["medication-reconciliation", "care-transitions", "patient-safety"]
+    },
+    {
+      "id": "deprescribing",
+      "name": "Deprescribing Opportunities",
+      "description": "Identify medications that are candidates for deprescribing based on Beers Criteria and evidence-based guidelines, with taper schedules",
+      "tags": ["deprescribing", "beers-criteria", "elderly-care"]
+    },
+    {
+      "id": "allergy-check",
+      "name": "Allergy & Cross-Reactivity Check",
+      "description": "Cross-reference medications against patient allergies including class-level cross-reactivity detection",
+      "tags": ["allergy", "cross-reactivity", "patient-safety"]
+    }
+  ],
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"]
+}

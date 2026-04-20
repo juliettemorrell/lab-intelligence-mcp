@@ -1,0 +1,26 @@
+{
+  "name": "pharmsafe-mcp",
+  "version": "1.0.0",
+  "description": "Medication Safety & Pharmacogenomics Intelligence MCP — checks drug interactions, pharmacogenomic conflicts, polypharmacy risks, renal/hepatic dosing, and deprescribing opportunities",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server-http.js",
+    "dev": "tsx src/server-http.ts",
+    "dev:stdio": "tsx src/index.ts",
+    "test": "tsx tests/test-all.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^5.1.0",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.15.2",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
