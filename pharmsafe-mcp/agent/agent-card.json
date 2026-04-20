@@ -67,6 +67,18 @@
       "name": "Anticholinergic Burden Scoring",
       "description": "Calculate total Anticholinergic Cognitive Burden (ACB) score with risk stratification for cognitive decline",
       "tags": ["anticholinergic", "cognitive", "ACB", "geriatrics"]
+    },
+    {
+      "id": "formatted-report",
+      "name": "Sleek Markdown Safety Report",
+      "description": "Generate a beautifully formatted markdown safety report with priority-grouped actions, risk scorecard with visual bars, patient snapshot, and all findings in one readable document",
+      "tags": ["reports", "markdown", "clinical-summary", "priority-actions"]
+    },
+    {
+      "id": "ehr-integration",
+      "name": "FHIR EHR Patient Pull",
+      "description": "Pull active medications, allergies, and relevant labs (GFR, liver function) directly from a connected FHIR R4 EHR via SHARP context headers",
+      "tags": ["FHIR", "EHR", "SHARP-context", "interoperability"]
     }
   ],
   "defaultInputModes": ["text"],
