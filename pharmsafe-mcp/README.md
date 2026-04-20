@@ -49,7 +49,7 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 | Clinical narrative | LLM (platform) | Natural language explanations |
 | Treatment decisions | Clinician | Human-in-the-loop always |
 
-## MCP Tools (18)
+## MCP Tools (20)
 
 ### Safety Checks
 - `check_interactions` — Drug-drug interaction detection with severity and mechanisms
@@ -63,10 +63,12 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 
 ### Analysis
 - `assess_polypharmacy` — Comprehensive multi-factor risk assessment
-- `generate_safety_report` — All-in-one scored safety report
+- `generate_safety_report` — All-in-one JSON scored safety report
+- `generate_formatted_report` — 🎨 **Beautiful markdown report** with priority-grouped actions, risk scorecard, visual indicators
 - `calculate_anticholinergic_burden` — ACB scoring with risk interpretation
 - `deprescribing_opportunities` — Evidence-based deprescribing with taper schedules
 - `medication_reconciliation` — Cross-source medication list comparison
+- `normalize_medication_name` — Strip doses/frequencies, map brand→generic
 
 ### Administration & Scheduling
 - `check_food_interactions` — Drug-food interaction detection (grapefruit, dairy, vitamin K, etc.)

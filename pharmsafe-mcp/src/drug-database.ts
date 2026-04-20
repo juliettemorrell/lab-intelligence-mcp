@@ -1,4 +1,5 @@
 import { DrugInteraction, SeverityLevel, InteractionMechanism } from './types.js';
+import { normalizeMedList, medMatches } from './normalizer.js';
 
 interface TherapeuticClass {
   name: string;
@@ -355,23 +356,165 @@ export const DRUG_INTERACTIONS: DrugInteraction[] = [
     clinicalEffect: 'Corticosteroids + NSAIDs: 2-4x increased GI ulceration and bleeding risk compared to either alone.',
     recommendation: 'Add PPI gastroprotection if combination needed. Prefer shortest NSAID course. Monitor for GI symptoms.',
     evidenceLevel: 'established', references: ['Piper et al. Ann Intern Med', 'Lexicomp']
+  },
+  // DOAC interactions (critical, commonly missed)
+  {
+    drug1: 'apixaban', drug2: 'amiodarone',
+    severity: 'moderate', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Amiodarone is a P-gp inhibitor, modestly increasing apixaban levels. Enhanced bleeding risk.',
+    recommendation: 'No dose adjustment required but monitor for bleeding. Caution in elderly or renal impairment.',
+    evidenceLevel: 'established', references: ['FDA Label', 'Lexicomp']
+  },
+  {
+    drug1: 'rivaroxaban', drug2: 'ketoconazole',
+    severity: 'contraindicated', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Strong CYP3A4 + P-gp inhibitor more than doubles rivaroxaban AUC. Severe bleeding risk.',
+    recommendation: 'CONTRAINDICATED. Use apixaban (less CYP3A4 dependence) or fluconazole (weaker inhibitor) instead.',
+    evidenceLevel: 'established', references: ['FDA Label', 'Mueck et al. Br J Clin Pharmacol']
+  },
+  {
+    drug1: 'apixaban', drug2: 'clarithromycin',
+    severity: 'major', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Strong CYP3A4 + P-gp inhibitor increases apixaban exposure ~2x. Bleeding risk.',
+    recommendation: 'Reduce apixaban dose to 2.5mg BID (if standard dose is 5mg BID). Avoid if already on 2.5mg BID. Use azithromycin instead.',
+    evidenceLevel: 'established', references: ['FDA Label']
+  },
+  {
+    drug1: 'dabigatran', drug2: 'dronedarone',
+    severity: 'major', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'P-gp inhibition increases dabigatran AUC 2.4x. High bleeding risk, especially in renal impairment.',
+    recommendation: 'Reduce dabigatran to 75mg BID if CrCl 30-50. Avoid if CrCl <30. Consider apixaban instead.',
+    evidenceLevel: 'established', references: ['FDA Label', 'RE-LY']
+  },
+  // Anticoagulant + anticoagulant (redundant except perioperative bridging)
+  {
+    drug1: 'apixaban', drug2: 'warfarin',
+    severity: 'major', mechanism: 'bleeding-risk-additive',
+    clinicalEffect: 'Dual anticoagulation dramatically increases bleeding risk. Only intended during DOAC-warfarin transition.',
+    recommendation: 'Verify this is intentional bridging (transitioning between agents). If not, discontinue one. INR goal 2.0 during transition.',
+    evidenceLevel: 'established', references: ['CHEST Guidelines', 'EHRA Practical Guide']
+  },
+  // SSRI + Anticoagulant (frequently missed)
+  {
+    drug1: 'sertraline', drug2: 'warfarin',
+    severity: 'moderate', mechanism: 'bleeding-risk-additive',
+    clinicalEffect: 'SSRIs impair platelet serotonin uptake → increased bleeding. May also displace warfarin from protein binding.',
+    recommendation: 'Monitor INR more closely (weekly for first month after SSRI initiation). Educate patient on bleeding signs. Consider PPI if GI bleeding risk factors present.',
+    evidenceLevel: 'established', references: ['Arch Intern Med 2009', 'Lexicomp']
+  },
+  {
+    drug1: 'fluoxetine', drug2: 'warfarin',
+    severity: 'major', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Fluoxetine inhibits CYP2C9 (warfarin metabolism) + SSRI platelet effect. Double hit increases INR and bleeding risk.',
+    recommendation: 'Prefer sertraline or citalopram (less CYP interaction). If fluoxetine needed, check INR at 3-5 days, reduce warfarin dose preemptively by 20-30%.',
+    evidenceLevel: 'established', references: ['Lexicomp', 'Sayal et al. Eur J Clin Pharmacol']
+  },
+  {
+    drug1: 'citalopram', drug2: 'apixaban',
+    severity: 'moderate', mechanism: 'bleeding-risk-additive',
+    clinicalEffect: 'SSRI-induced platelet dysfunction + anticoagulation: elevated bleeding risk (especially GI).',
+    recommendation: 'Educate on bleeding symptoms. Consider PPI if other GI risk factors (age >65, H pylori, NSAID use). Monitor stool for occult blood.',
+    evidenceLevel: 'established', references: ['BMJ 2014', 'Lexicomp']
+  },
+  // Lithium + NSAID
+  {
+    drug1: 'lithium', drug2: 'ibuprofen',
+    severity: 'major', mechanism: 'renal-competition',
+    clinicalEffect: 'NSAIDs reduce lithium clearance by 30-60% (prostaglandin-mediated). Lithium toxicity risk (tremor, confusion, seizures).',
+    recommendation: 'Avoid chronic NSAID use with lithium. For short course, reduce lithium 25-50%, check level at 3-5 days. Acetaminophen preferred.',
+    evidenceLevel: 'established', references: ['Am J Med 1992', 'Lexicomp']
+  },
+  {
+    drug1: 'lithium', drug2: 'lisinopril',
+    severity: 'major', mechanism: 'renal-competition',
+    clinicalEffect: 'ACE inhibitors reduce lithium clearance, risk of lithium toxicity increased 7x.',
+    recommendation: 'Avoid combination if possible. If needed, reduce lithium dose 20-30% and check level within 5 days, monthly thereafter.',
+    evidenceLevel: 'established', references: ['Finley et al. JAMA', 'Lexicomp']
+  },
+  // Macrolide + CYP3A4 substrates
+  {
+    drug1: 'erythromycin', drug2: 'simvastatin',
+    severity: 'contraindicated', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Strong CYP3A4 inhibition: simvastatin levels increase 5-10x. Rhabdomyolysis risk.',
+    recommendation: 'Suspend simvastatin during erythromycin course. Use azithromycin instead (minimal CYP3A4 effect).',
+    evidenceLevel: 'established', references: ['FDA Label', 'ACC/AHA']
+  },
+  // Statin + fibrate
+  {
+    drug1: 'atorvastatin', drug2: 'gemfibrozil',
+    severity: 'major', mechanism: 'pharmacodynamic-additive',
+    clinicalEffect: 'Both cause myopathy. Combined use increases rhabdomyolysis risk ~5x. Gemfibrozil also inhibits statin glucuronidation.',
+    recommendation: 'Avoid combination. Use fenofibrate instead (3-fold lower myopathy risk). Monitor CK if combination unavoidable.',
+    evidenceLevel: 'established', references: ['FDA Boxed Warning', 'AHA/ACC']
+  },
+  // QT prolonging combinations (more)
+  {
+    drug1: 'amiodarone', drug2: 'azithromycin',
+    severity: 'major', mechanism: 'qt-prolongation-additive',
+    clinicalEffect: 'Additive QT prolongation. Torsades risk, especially with baseline bradycardia or hypokalemia.',
+    recommendation: 'Avoid if possible. If required, baseline and on-treatment ECG. Maintain K >4.0, Mg >2.0. Consider doxycycline if appropriate.',
+    evidenceLevel: 'established', references: ['CredibleMeds', 'NEJM 2012']
+  },
+  {
+    drug1: 'haloperidol', drug2: 'ondansetron',
+    severity: 'major', mechanism: 'qt-prolongation-additive',
+    clinicalEffect: 'Both QT-prolonging. Combined use especially problematic in ICU/post-op patients.',
+    recommendation: 'Use alternative antiemetic (granisetron has less QT effect) or alternative antipsychotic (quetiapine at low dose).',
+    evidenceLevel: 'established', references: ['CredibleMeds', 'Critical Care Med']
+  },
+  // Hyperkalemia risk pairs
+  {
+    drug1: 'valsartan', drug2: 'spironolactone',
+    severity: 'major', mechanism: 'pharmacodynamic-additive',
+    clinicalEffect: 'Dual RAAS blockade with K-sparing diuretic: hyperkalemia risk, particularly in renal impairment or diabetes.',
+    recommendation: 'Monitor potassium at baseline, 1 week, then monthly. Hold if K >5.0. Especially caution in elderly and CKD.',
+    evidenceLevel: 'established', references: ['RALES', 'EMPHASIS-HF']
+  },
+  // Opioid + CNS depressant (more)
+  {
+    drug1: 'fentanyl', drug2: 'lorazepam',
+    severity: 'major', mechanism: 'cns-depression-additive',
+    clinicalEffect: 'Combined opioid + benzodiazepine: profound respiratory depression, death. FDA Black Box Warning.',
+    recommendation: 'Avoid combination outside of supervised settings (e.g., ICU, palliative care). Naloxone rescue required. Lowest doses, shortest duration.',
+    evidenceLevel: 'established', references: ['FDA Black Box Warning 2016']
+  },
+  {
+    drug1: 'morphine', drug2: 'pregabalin',
+    severity: 'major', mechanism: 'cns-depression-additive',
+    clinicalEffect: 'Gabapentinoid + opioid: respiratory depression, overdose risk. FDA warning 2019.',
+    recommendation: 'Use lowest effective doses. Consider co-prescribing naloxone. Avoid concurrent benzodiazepines.',
+    evidenceLevel: 'established', references: ['FDA Drug Safety 2019', 'BMJ 2017']
+  },
+  // MAO inhibitor + serotonergic
+  {
+    drug1: 'phenelzine', drug2: 'sertraline',
+    severity: 'contraindicated', mechanism: 'serotonergic-additive',
+    clinicalEffect: 'MAOI + SSRI: life-threatening serotonin syndrome. Hypertensive crisis also possible.',
+    recommendation: 'CONTRAINDICATED. Washout: 2 weeks between MAOI and SSRI (5 weeks from fluoxetine → MAOI).',
+    evidenceLevel: 'established', references: ['FDA Label', 'Boyer & Shannon NEJM']
   }
 ];
 
 export function findInteractions(medications: string[]): DrugInteraction[] {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const results: DrugInteraction[] = [];
+  const seen = new Set<string>();
 
   for (let i = 0; i < normalizedMeds.length; i++) {
     for (let j = i + 1; j < normalizedMeds.length; j++) {
       const med1 = normalizedMeds[i];
       const med2 = normalizedMeds[j];
+      if (!med1 || !med2 || med1 === med2) continue;
 
       for (const interaction of DRUG_INTERACTIONS) {
-        const d1 = interaction.drug1.toLowerCase();
-        const d2 = interaction.drug2.toLowerCase();
-        if ((med1.includes(d1) || d1.includes(med1)) && (med2.includes(d2) || d2.includes(med2)) ||
-            (med1.includes(d2) || d2.includes(med1)) && (med2.includes(d1) || d1.includes(med2))) {
+        const match =
+          (medMatches(med1, interaction.drug1) && medMatches(med2, interaction.drug2)) ||
+          (medMatches(med1, interaction.drug2) && medMatches(med2, interaction.drug1));
+
+        if (match) {
+          const key = [interaction.drug1, interaction.drug2].sort().join('|');
+          if (seen.has(key)) continue;
+          seen.add(key);
           results.push(interaction);
         }
       }
@@ -382,15 +525,16 @@ export function findInteractions(medications: string[]): DrugInteraction[] {
 }
 
 export function findDuplicateTherapies(medications: string[]): { drugs: string[]; therapeuticClass: TherapeuticClass }[] {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const results: { drugs: string[]; therapeuticClass: TherapeuticClass }[] = [];
 
   for (const tc of THERAPEUTIC_CLASSES) {
     const matches = normalizedMeds.filter(med =>
-      tc.drugs.some(d => med.includes(d) || d.includes(med))
+      tc.drugs.some(d => medMatches(med, d))
     );
-    if (matches.length >= 2) {
-      results.push({ drugs: matches, therapeuticClass: tc });
+    const unique = Array.from(new Set(matches));
+    if (unique.length >= 2) {
+      results.push({ drugs: unique, therapeuticClass: tc });
     }
   }
 
@@ -398,8 +542,7 @@ export function findDuplicateTherapies(medications: string[]): { drugs: string[]
 }
 
 export function getDrugClasses(drugName: string): string[] {
-  const normalized = drugName.toLowerCase().trim();
   return THERAPEUTIC_CLASSES
-    .filter(tc => tc.drugs.some(d => normalized.includes(d) || d.includes(normalized)))
+    .filter(tc => tc.drugs.some(d => medMatches(drugName, d)))
     .map(tc => tc.name);
 }

@@ -180,6 +180,8 @@ export const BEERS_DISEASE_DRUG: { condition: string; drugs: string[]; rationale
   }
 ];
 
+import { normalizeMedList, medMatches } from './normalizer.js';
+
 export function checkBeersCriteria(
   medications: string[],
   age: number,
@@ -187,19 +189,23 @@ export function checkBeersCriteria(
 ): { avoidList: BeersEntry[]; diseaseDrug: { condition: string; drug: string; rationale: string; recommendation: string }[] } {
   if (age < 65) return { avoidList: [], diseaseDrug: [] };
 
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const normalizedConditions = conditions?.map(c => c.toLowerCase().trim()) || [];
 
   const avoidList: BeersEntry[] = [];
+  const seenAvoid = new Set<string>();
   for (const med of normalizedMeds) {
     for (const entry of BEERS_AVOID) {
-      if (med.includes(entry.drug.toLowerCase()) || entry.drug.toLowerCase().includes(med)) {
+      if (medMatches(med, entry.drug)) {
+        if (seenAvoid.has(entry.drug)) continue;
+        seenAvoid.add(entry.drug);
         avoidList.push(entry);
       }
     }
   }
 
   const diseaseDrug: { condition: string; drug: string; rationale: string; recommendation: string }[] = [];
+  const seenDD = new Set<string>();
   for (const ddEntry of BEERS_DISEASE_DRUG) {
     const conditionMatch = normalizedConditions.some(c =>
       c.includes(ddEntry.condition.toLowerCase().split('/')[0]) ||
@@ -209,7 +215,10 @@ export function checkBeersCriteria(
 
     for (const med of normalizedMeds) {
       for (const dangerousDrug of ddEntry.drugs) {
-        if (med.includes(dangerousDrug.toLowerCase()) || dangerousDrug.toLowerCase().includes(med)) {
+        if (medMatches(med, dangerousDrug)) {
+          const key = `${ddEntry.condition}|${dangerousDrug}`;
+          if (seenDD.has(key)) continue;
+          seenDD.add(key);
           diseaseDrug.push({
             condition: ddEntry.condition,
             drug: dangerousDrug,

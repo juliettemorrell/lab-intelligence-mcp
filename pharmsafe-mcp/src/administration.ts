@@ -67,13 +67,18 @@ const FOOD_INTERACTIONS: FoodInteraction[] = [
   { drug: 'ciprofloxacin', food: 'dairy/calcium-fortified foods', effect: 'Calcium chelates fluoroquinolones, reducing absorption', recommendation: 'Do not take with milk, yogurt, or calcium-fortified juice. Separate by 2 hours.', severity: 'moderate' }
 ];
 
+import { normalizeMedList, medMatches } from './normalizer.js';
+
 export function getAdministrationGuidance(medications: string[]): AdministrationGuidance[] {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const results: AdministrationGuidance[] = [];
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const entry of ADMINISTRATION_GUIDANCE) {
-      if (med.includes(entry.drug) || entry.drug.includes(med)) {
+      if (medMatches(med, entry.drug)) {
+        if (seen.has(entry.drug)) continue;
+        seen.add(entry.drug);
         results.push(entry);
       }
     }
@@ -83,19 +88,22 @@ export function getAdministrationGuidance(medications: string[]): Administration
 }
 
 export function checkTimingConflicts(medications: string[]): TimingConflict[] {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const results: TimingConflict[] = [];
+  const seen = new Set<string>();
 
   for (let i = 0; i < normalizedMeds.length; i++) {
     for (let j = i + 1; j < normalizedMeds.length; j++) {
-      for (const conflict of TIMING_CONFLICTS) {
-        const d1 = conflict.drug1.toLowerCase();
-        const d2 = conflict.drug2.toLowerCase();
-        const med1 = normalizedMeds[i];
-        const med2 = normalizedMeds[j];
+      const med1 = normalizedMeds[i];
+      const med2 = normalizedMeds[j];
+      if (!med1 || !med2 || med1 === med2) continue;
 
-        if ((med1.includes(d1) || d1.includes(med1)) && (med2.includes(d2) || d2.includes(med2)) ||
-            (med1.includes(d2) || d2.includes(med1)) && (med2.includes(d1) || d1.includes(med2))) {
+      for (const conflict of TIMING_CONFLICTS) {
+        if ((medMatches(med1, conflict.drug1) && medMatches(med2, conflict.drug2)) ||
+            (medMatches(med1, conflict.drug2) && medMatches(med2, conflict.drug1))) {
+          const key = [conflict.drug1, conflict.drug2].sort().join('|');
+          if (seen.has(key)) continue;
+          seen.add(key);
           results.push(conflict);
         }
       }
@@ -106,12 +114,16 @@ export function checkTimingConflicts(medications: string[]): TimingConflict[] {
 }
 
 export function checkFoodInteractions(medications: string[]): FoodInteraction[] {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const results: FoodInteraction[] = [];
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const entry of FOOD_INTERACTIONS) {
-      if (med.includes(entry.drug.toLowerCase()) || entry.drug.toLowerCase().includes(med)) {
+      if (medMatches(med, entry.drug)) {
+        const key = `${entry.drug}|${entry.food}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
         results.push(entry);
       }
     }

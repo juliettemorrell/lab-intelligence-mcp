@@ -1,4 +1,5 @@
 import { RenalFunction, HepaticFunction, RenalDosingResult, HepaticDosingResult } from './types.js';
+import { normalizeMedList, medMatches } from './normalizer.js';
 
 interface RenalDosingEntry {
   drug: string;
@@ -173,11 +174,13 @@ export function checkRenalDosing(
   if (gfr >= 80) return [];
 
   const results: RenalDosingResult[] = [];
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const entry of RENAL_DOSING) {
-      if (!med.includes(entry.drug.toLowerCase()) && !entry.drug.toLowerCase().includes(med)) continue;
+      if (!medMatches(med, entry.drug)) continue;
+      if (seen.has(entry.drug)) continue;
 
       for (const adj of entry.adjustments) {
         if (gfr >= adj.gfrRange[0] && gfr <= adj.gfrRange[1]) {
@@ -190,6 +193,7 @@ export function checkRenalDosing(
             recommendation: adj.recommendation,
             monitoringRequired: adj.monitoring
           });
+          seen.add(entry.drug);
           break;
         }
       }
@@ -207,11 +211,13 @@ export function checkHepaticDosing(
   if (!childPugh) return [];
 
   const results: HepaticDosingResult[] = [];
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const entry of HEPATIC_DOSING) {
-      if (!med.includes(entry.drug.toLowerCase()) && !entry.drug.toLowerCase().includes(med)) continue;
+      if (!medMatches(med, entry.drug)) continue;
+      if (seen.has(entry.drug)) continue;
 
       for (const adj of entry.adjustments) {
         if (adj.childPugh.includes(childPugh)) {
@@ -222,6 +228,7 @@ export function checkHepaticDosing(
             adjustedDose: adj.adjustedDose,
             recommendation: adj.recommendation
           });
+          seen.add(entry.drug);
           break;
         }
       }

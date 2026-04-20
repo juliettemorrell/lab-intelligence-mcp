@@ -1,4 +1,5 @@
 import { PgxDrugEntry, PatientGenotype, PgxResult, MetabolizerStatus } from './types.js';
+import { normalizeMedList, medMatches } from './normalizer.js';
 
 export const PGX_DATABASE: PgxDrugEntry[] = [
   // CYP2D6 substrates
@@ -168,22 +169,26 @@ export function checkPharmacogenomics(
   genotypes: PatientGenotype[]
 ): PgxResult[] {
   const results: PgxResult[] = [];
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const entry of PGX_DATABASE) {
-      if (!med.includes(entry.drug.toLowerCase()) && !entry.drug.toLowerCase().includes(med)) continue;
+      if (!medMatches(med, entry.drug)) continue;
 
       const matchingGenotype = genotypes.find(g =>
         g.gene.toUpperCase() === entry.gene.toUpperCase()
       );
 
       if (!matchingGenotype) continue;
+      if (matchingGenotype.metabolizerStatus === 'normal') continue;
 
       const impact = entry.metabolizerImpact[matchingGenotype.metabolizerStatus];
       if (!impact) continue;
 
-      if (matchingGenotype.metabolizerStatus === 'normal') continue;
+      const key = `${entry.drug}|${entry.gene}|${matchingGenotype.metabolizerStatus}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
 
       results.push({
         drug: entry.drug,

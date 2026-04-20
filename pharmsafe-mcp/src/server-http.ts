@@ -69,7 +69,9 @@ app.get('/health', (_req, res) => {
       'pull_patient_medications',
       'check_food_interactions',
       'check_timing_conflicts',
-      'generate_timing_schedule'
+      'generate_timing_schedule',
+      'generate_formatted_report',
+      'normalize_medication_name'
     ],
     timestamp: new Date().toISOString()
   });

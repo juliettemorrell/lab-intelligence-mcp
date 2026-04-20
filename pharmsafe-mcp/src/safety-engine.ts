@@ -5,6 +5,7 @@ import {
 import { findInteractions, findDuplicateTherapies, getDrugClasses } from './drug-database.js';
 import { checkPharmacogenomics } from './pharmacogenomics.js';
 import { checkRenalDosing, checkHepaticDosing } from './renal-hepatic.js';
+import { normalizeMedList, medMatches } from './normalizer.js';
 
 const ALLERGY_CROSS_REACTIVITY: Record<string, string[]> = {
   'penicillin': ['amoxicillin', 'ampicillin', 'piperacillin', 'nafcillin', 'oxacillin', 'dicloxacillin'],
@@ -81,13 +82,18 @@ export function checkAllergies(
   if (!allergies || allergies.length === 0) return [];
 
   const results: AllergyCheckResult[] = [];
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
+  const seen = new Set<string>();
 
   for (const allergy of allergies) {
     const allergen = allergy.substance.toLowerCase().trim();
 
     for (const med of normalizedMeds) {
-      if (med.includes(allergen) || allergen.includes(med)) {
+      const directMatch = medMatches(med, allergen);
+      if (directMatch) {
+        const key = `${med}|${allergen}|direct`;
+        if (seen.has(key)) continue;
+        seen.add(key);
         results.push({
           drug: med,
           allergen: allergy.substance,
@@ -99,10 +105,13 @@ export function checkAllergies(
       }
 
       for (const [classKey, members] of Object.entries(ALLERGY_CROSS_REACTIVITY)) {
-        const allergenInClass = classKey === allergen || members.some(m => m === allergen || allergen.includes(m));
-        const medInClass = members.some(m => med.includes(m) || m.includes(med));
+        const allergenInClass = classKey === allergen || members.some(m => medMatches(m, allergen));
+        const medInClass = members.some(m => medMatches(m, med));
 
         if (allergenInClass && medInClass) {
+          const key = `${med}|${allergen}|cross`;
+          if (seen.has(key)) continue;
+          seen.add(key);
           results.push({
             drug: med,
             allergen: allergy.substance,
@@ -122,19 +131,19 @@ export function findDeprescribingCandidates(
   medications: string[],
   patientAge?: number
 ): DeprescribingCandidate[] {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const results: DeprescribingCandidate[] = [];
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const [drug, info] of Object.entries(DEPRESCRIBING_CANDIDATES)) {
-      if (med.includes(drug) || drug.includes(med)) {
-        if (patientAge && patientAge < 65 && (drug === 'alprazolam' || drug === 'lorazepam' || drug === 'zolpidem' || drug === 'oxybutynin' || drug === 'glyburide')) {
+      if (medMatches(med, drug)) {
+        if (patientAge !== undefined && patientAge < 65 && (drug === 'alprazolam' || drug === 'lorazepam' || drug === 'zolpidem' || drug === 'oxybutynin' || drug === 'glyburide')) {
           continue;
         }
-        results.push({
-          drug,
-          ...info
-        });
+        if (seen.has(drug)) continue;
+        seen.add(drug);
+        results.push({ drug, ...info });
       }
     }
   }

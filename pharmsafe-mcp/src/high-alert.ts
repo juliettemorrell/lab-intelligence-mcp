@@ -94,27 +94,34 @@ export const ISMP_HIGH_ALERT: HighAlertMedication[] = [
   }
 ];
 
+import { normalizeMedList, medMatches } from './normalizer.js';
+
 export function checkHighAlertMedications(medications: string[]): HighAlertMedication[] {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const results: HighAlertMedication[] = [];
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const entry of ISMP_HIGH_ALERT) {
-      if (med.includes(entry.drug.toLowerCase()) || entry.drug.toLowerCase().includes(med)) {
+      if (medMatches(med, entry.drug)) {
+        if (seen.has(entry.drug)) continue;
+        seen.add(entry.drug);
         results.push(entry);
       }
     }
   }
 
-  // Check for "insulin" generically
+  // Catch insulin by any name (normalizer maps most brands → "insulin")
   const hasInsulin = normalizedMeds.some(m =>
-    m.includes('insulin') || m.includes('glargine') || m.includes('lispro') ||
-    m.includes('aspart') || m.includes('detemir') || m.includes('degludec') ||
-    m.includes('novolog') || m.includes('humalog') || m.includes('lantus') ||
-    m.includes('levemir') || m.includes('tresiba')
+    m === 'insulin' || m.includes('glargine') || m.includes('lispro') ||
+    m.includes('aspart') || m.includes('detemir') || m.includes('degludec')
   );
-  if (hasInsulin && !results.some(r => r.drug === 'insulin')) {
-    results.push(ISMP_HIGH_ALERT.find(e => e.drug === 'insulin')!);
+  if (hasInsulin && !seen.has('insulin')) {
+    const insulin = ISMP_HIGH_ALERT.find(e => e.drug === 'insulin');
+    if (insulin) {
+      seen.add('insulin');
+      results.push(insulin);
+    }
   }
 
   return results;
@@ -156,12 +163,15 @@ export function calculateAnticholinergicBurden(medications: string[]): {
   breakdown: AnticholinergicBurden[];
   interpretation: string;
 } {
-  const normalizedMeds = medications.map(m => m.toLowerCase().trim());
+  const normalizedMeds = normalizeMedList(medications);
   const breakdown: AnticholinergicBurden[] = [];
+  const seen = new Set<string>();
 
   for (const med of normalizedMeds) {
     for (const [drug, score] of Object.entries(ACB_SCORES)) {
-      if (med.includes(drug) || drug.includes(med)) {
+      if (medMatches(med, drug)) {
+        if (seen.has(drug)) break;
+        seen.add(drug);
         breakdown.push({ drug, score });
         break;
       }

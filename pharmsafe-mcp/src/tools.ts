@@ -12,6 +12,8 @@ import { checkBeersCriteria } from './beers-criteria.js';
 import { checkHighAlertMedications, calculateAnticholinergicBurden } from './high-alert.js';
 import { fetchPatientData } from './fhir-client.js';
 import { checkTimingConflicts, checkFoodInteractions, getAdministrationGuidance, generateTimingSchedule } from './administration.js';
+import { formatSafetyReport } from './report-formatter.js';
+import { normalizeMedName, normalizeMedList } from './normalizer.js';
 
 const MedicationSchema = z.object({
   name: z.string(),
@@ -630,6 +632,64 @@ export function registerTools(server: McpServer): void {
             separationNotes: schedule.separationNotes,
             foodWarnings: foodInteractions.filter(f => f.severity === 'major').map(f => `${f.drug}: ${f.recommendation}`),
             disclaimer: CLINICAL_DISCLAIMER
+          }, null, 2)
+        }]
+      };
+    }
+  );
+
+  server.tool(
+    'generate_formatted_report',
+    'Generate a beautifully formatted markdown medication safety report with priority-grouped actions, risk scorecard, and visual indicators. Perfect for clinical presentation.',
+    {
+      medications: z.array(MedicationSchema).describe('Full medication list'),
+      allergies: z.array(AllergySchema).optional(),
+      genotypes: z.array(GenotypeSchema).optional(),
+      renalFunction: RenalSchema.optional(),
+      hepaticFunction: HepaticSchema.optional(),
+      age: z.number().optional(),
+      sex: z.enum(['male', 'female']).optional(),
+      conditions: z.array(z.string()).optional()
+    },
+    async ({ medications, allergies, genotypes, renalFunction, hepaticFunction, age, sex, conditions }) => {
+      const context: PatientContext = {
+        medications: medications as MedicationEntry[],
+        allergies: allergies as AllergyEntry[] | undefined,
+        genotypes: genotypes as PatientGenotype[] | undefined,
+        renalFunction: renalFunction as RenalFunction | undefined,
+        hepaticFunction: hepaticFunction as HepaticFunction | undefined,
+        age,
+        sex,
+        conditions
+      };
+
+      const report = generateSafetyReport(context);
+      const formatted = formatSafetyReport(context, report);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: formatted.markdown
+        }]
+      };
+    }
+  );
+
+  server.tool(
+    'normalize_medication_name',
+    'Normalize a medication name: strips doses/frequencies, maps brand names to generic. Useful for preprocessing patient-reported or free-text medication lists.',
+    {
+      medicationName: z.string().describe('Raw medication name (may include brand, dose, frequency, route)')
+    },
+    async ({ medicationName }) => {
+      const normalized = normalizeMedName(medicationName);
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            input: medicationName,
+            normalized: normalized || null,
+            wasRecognized: normalized.length > 0
           }, null, 2)
         }]
       };
