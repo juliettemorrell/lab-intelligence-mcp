@@ -9,7 +9,7 @@
     "start": "node dist/server-http.js",
     "dev": "tsx src/server-http.ts",
     "dev:stdio": "tsx src/index.ts",
-    "test": "tsx tests/test-all.ts"
+    "test": "tsx tests/test-all.ts && tsx tests/test-integration.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",

@@ -1,0 +1,87 @@
+{
+  "description": "Demo patient: 78-year-old female with polypharmacy, CKD, and pharmacogenomic data. Designed to trigger multiple safety alerts across all PharmSafe tools.",
+  "patient": {
+    "age": 78,
+    "sex": "female",
+    "conditions": [
+      "atrial fibrillation",
+      "type 2 diabetes",
+      "osteoarthritis",
+      "hypertension",
+      "GERD",
+      "insomnia",
+      "overactive bladder",
+      "chronic kidney disease stage 3b",
+      "osteoporosis",
+      "anxiety"
+    ],
+    "medications": [
+      { "name": "Warfarin", "genericName": "warfarin", "dose": "5mg", "frequency": "daily", "indication": "atrial fibrillation" },
+      { "name": "Metformin", "genericName": "metformin", "dose": "1000mg", "frequency": "BID", "indication": "type 2 diabetes" },
+      { "name": "Glyburide", "genericName": "glyburide", "dose": "5mg", "frequency": "daily", "indication": "type 2 diabetes" },
+      { "name": "Omeprazole", "genericName": "omeprazole", "dose": "40mg", "frequency": "daily", "indication": "GERD" },
+      { "name": "Naproxen", "genericName": "naproxen", "dose": "500mg", "frequency": "BID", "indication": "osteoarthritis" },
+      { "name": "Alprazolam", "genericName": "alprazolam", "dose": "0.5mg", "frequency": "TID", "indication": "anxiety" },
+      { "name": "Zolpidem", "genericName": "zolpidem", "dose": "10mg", "frequency": "nightly", "indication": "insomnia" },
+      { "name": "Oxybutynin", "genericName": "oxybutynin", "dose": "5mg", "frequency": "BID", "indication": "overactive bladder" },
+      { "name": "Lisinopril", "genericName": "lisinopril", "dose": "20mg", "frequency": "daily", "indication": "hypertension" },
+      { "name": "Amlodipine", "genericName": "amlodipine", "dose": "10mg", "frequency": "daily", "indication": "hypertension" },
+      { "name": "Simvastatin", "genericName": "simvastatin", "dose": "40mg", "frequency": "nightly", "indication": "hyperlipidemia" },
+      { "name": "Calcium carbonate", "genericName": "calcium carbonate", "dose": "1200mg", "frequency": "daily", "indication": "osteoporosis" }
+    ],
+    "allergies": [
+      { "substance": "penicillin", "reaction": "rash", "severity": "moderate" },
+      { "substance": "sulfa", "reaction": "hives", "severity": "moderate" }
+    ],
+    "genotypes": [
+      { "gene": "CYP2C9", "metabolizerStatus": "intermediate", "diplotype": "*1/*3" },
+      { "gene": "CYP2C19", "metabolizerStatus": "poor", "diplotype": "*2/*2" },
+      { "gene": "SLCO1B1", "metabolizerStatus": "intermediate", "diplotype": "*1/*5" }
+    ],
+    "renalFunction": {
+      "gfr": 38,
+      "creatinine": 1.6,
+      "bun": 32
+    },
+    "hepaticFunction": {
+      "alt": 28,
+      "ast": 31,
+      "albumin": 3.8,
+      "totalBilirubin": 0.9
+    }
+  },
+  "expectedAlerts": {
+    "interactions": [
+      "warfarin + naproxen (bleeding risk)",
+      "lisinopril + naproxen (nephrotoxicity)",
+      "amlodipine + simvastatin (CYP3A4, limit simvastatin to 20mg)"
+    ],
+    "beers": [
+      "alprazolam (benzodiazepine in elderly)",
+      "zolpidem (sedative-hypnotic in elderly)",
+      "glyburide (severe hypoglycemia risk in elderly)",
+      "oxybutynin (anticholinergic in elderly)"
+    ],
+    "pharmacogenomics": [
+      "warfarin + CYP2C9 intermediate: needs 20-30% dose reduction",
+      "omeprazole + CYP2C19 poor: 5-12x higher AUC, reduce to 10mg",
+      "simvastatin + SLCO1B1 intermediate: limit to 20mg max"
+    ],
+    "renalDosing": [
+      "metformin at GFR 38: max 500mg daily",
+      "lisinopril at GFR 38: dose reduction needed"
+    ],
+    "anticholinergicBurden": "High — oxybutynin(3) + alprazolam(1) + warfarin(1) = elevated cognitive risk",
+    "duplicates": "None expected (different classes)",
+    "deprescribing": [
+      "omeprazole: step-down taper, reassess indication",
+      "alprazolam: gradual taper with CBT-I referral",
+      "zolpidem: reduce and implement sleep hygiene",
+      "oxybutynin: switch to mirabegron"
+    ],
+    "highAlert": [
+      "warfarin: INR monitoring, drug interaction review",
+      "metformin: hold for contrast, B12 monitoring"
+    ]
+  }
+}

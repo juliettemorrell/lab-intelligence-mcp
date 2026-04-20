@@ -205,6 +205,20 @@ export const DRUG_INTERACTIONS: DrugInteraction[] = [
     evidenceLevel: 'established', references: ['BMJ 2013 Triple Whammy Study', 'KDIGO Guidelines']
   },
   {
+    drug1: 'lisinopril', drug2: 'naproxen',
+    severity: 'moderate', mechanism: 'nephrotoxicity-additive',
+    clinicalEffect: 'ACE inhibitor + NSAID: reduces GFR, increases creatinine, hyperkalemia risk. Triple whammy if diuretic also present.',
+    recommendation: 'Avoid chronic NSAID use with ACE inhibitors. Use acetaminophen or topical NSAIDs instead.',
+    evidenceLevel: 'established', references: ['BMJ 2013', 'KDIGO Guidelines']
+  },
+  {
+    drug1: 'warfarin', drug2: 'naproxen',
+    severity: 'major', mechanism: 'bleeding-risk-additive',
+    clinicalEffect: 'NSAID + anticoagulant: GI bleeding risk increased 6-fold. NSAIDs also displace warfarin from protein binding.',
+    recommendation: 'Avoid combination. If NSAID required, use shortest course with PPI. Monitor INR. Consider acetaminophen.',
+    evidenceLevel: 'established', references: ['CHEST Guidelines', 'Lexicomp']
+  },
+  {
     drug1: 'metformin', drug2: 'iodinated contrast',
     severity: 'major', mechanism: 'nephrotoxicity-additive',
     clinicalEffect: 'Contrast-induced nephropathy can impair metformin clearance, leading to lactic acidosis',
