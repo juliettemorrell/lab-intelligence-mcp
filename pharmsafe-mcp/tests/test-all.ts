@@ -4,6 +4,7 @@ import { checkRenalDosing, checkHepaticDosing } from '../src/renal-hepatic.js';
 import { checkAllergies, findDeprescribingCandidates, generateSafetyReport } from '../src/safety-engine.js';
 import { checkBeersCriteria } from '../src/beers-criteria.js';
 import { checkHighAlertMedications, calculateAnticholinergicBurden } from '../src/high-alert.js';
+import { checkTimingConflicts, checkFoodInteractions, generateTimingSchedule } from '../src/administration.js';
 import { PatientContext, PatientGenotype } from '../src/types.js';
 
 let passed = 0;
@@ -182,6 +183,32 @@ assert(acb2.riskLevel === 'low', 'Low ACB = low risk level');
 const acb3 = calculateAnticholinergicBurden(['paroxetine', 'sertraline', 'furosemide']);
 assert(acb3.totalScore > 0, 'Paroxetine (3) + sertraline (1) + furosemide (1) detected');
 assert(acb3.breakdown.length >= 3, 'All 3 meds in breakdown');
+
+// Timing Conflicts
+console.log('\nTiming Conflicts:');
+const timing1 = checkTimingConflicts(['levothyroxine', 'calcium carbonate', 'metformin']);
+assert(timing1.length > 0, 'Detects levothyroxine + calcium timing conflict');
+assert(timing1[0].separationRequired.includes('4'), 'Requires 4h separation for levothyroxine + calcium');
+
+const timing2 = checkTimingConflicts(['ciprofloxacin', 'iron']);
+assert(timing2.length > 0, 'Detects ciprofloxacin + iron timing conflict');
+
+// Food Interactions
+console.log('\nFood Interactions:');
+const food1 = checkFoodInteractions(['simvastatin', 'warfarin', 'metformin']);
+assert(food1.some(f => f.drug === 'simvastatin' && f.food.includes('grapefruit')), 'Flags simvastatin + grapefruit');
+assert(food1.some(f => f.drug === 'warfarin' && f.food.includes('vitamin K')), 'Flags warfarin + vitamin K foods');
+
+const food2 = checkFoodInteractions(['lisinopril']);
+assert(food2.some(f => f.food.includes('potassium')), 'Flags ACE inhibitor + potassium foods');
+
+// Timing Schedule
+console.log('\nTiming Schedule:');
+const schedule = generateTimingSchedule(['levothyroxine', 'omeprazole', 'metformin', 'simvastatin', 'calcium carbonate']);
+assert(schedule.morning_empty.includes('levothyroxine'), 'Levothyroxine scheduled early morning empty stomach');
+assert(schedule.evening.includes('simvastatin'), 'Simvastatin scheduled evening');
+assert(schedule.with_meals.includes('metformin'), 'Metformin scheduled with meals');
+assert(schedule.separationNotes.length > 0, 'Has separation notes for conflicting meds');
 
 // Summary
 console.log(`\n=== Results: ${passed} passed, ${failed} failed ===\n`);

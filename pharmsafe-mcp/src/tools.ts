@@ -11,6 +11,7 @@ import { checkAllergies, findDeprescribingCandidates, generateSafetyReport } fro
 import { checkBeersCriteria } from './beers-criteria.js';
 import { checkHighAlertMedications, calculateAnticholinergicBurden } from './high-alert.js';
 import { fetchPatientData } from './fhir-client.js';
+import { checkTimingConflicts, checkFoodInteractions, getAdministrationGuidance, generateTimingSchedule } from './administration.js';
 
 const MedicationSchema = z.object({
   name: z.string(),
@@ -547,6 +548,91 @@ export function registerTools(server: McpServer): void {
           }]
         };
       }
+    }
+  );
+
+  server.tool(
+    'check_food_interactions',
+    'Identify drug-food interactions including grapefruit, dairy, vitamin K, tyramine, alcohol, and high-potassium foods.',
+    { medications: z.array(z.string()).describe('List of medication names') },
+    async ({ medications }) => {
+      const interactions = checkFoodInteractions(medications);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            medicationsChecked: medications.length,
+            foodInteractionsFound: interactions.length,
+            interactions: interactions.sort((a, b) => {
+              const order = { major: 0, moderate: 1, minor: 2 };
+              return order[a.severity] - order[b.severity];
+            }),
+            disclaimer: CLINICAL_DISCLAIMER
+          }, null, 2)
+        }]
+      };
+    }
+  );
+
+  server.tool(
+    'check_timing_conflicts',
+    'Identify medications that must be separated in time (e.g., levothyroxine + calcium, ciprofloxacin + iron) with required separation intervals.',
+    { medications: z.array(z.string()).describe('List of medication names') },
+    async ({ medications }) => {
+      const conflicts = checkTimingConflicts(medications);
+      const guidance = getAdministrationGuidance(medications);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            medicationsChecked: medications.length,
+            timingConflicts: conflicts.length,
+            conflicts: conflicts.map(c => ({
+              drugs: [c.drug1, c.drug2],
+              conflict: c.conflict,
+              separationRequired: c.separationRequired,
+              recommendation: c.recommendation
+            })),
+            administrationGuidance: guidance.map(g => ({
+              drug: g.drug,
+              bestTiming: g.timing,
+              foodRequirement: g.withFood,
+              specialInstructions: g.specialInstructions
+            })),
+            disclaimer: CLINICAL_DISCLAIMER
+          }, null, 2)
+        }]
+      };
+    }
+  );
+
+  server.tool(
+    'generate_timing_schedule',
+    'Generate an optimal daily medication timing schedule accounting for food requirements, drug separations, and administration constraints.',
+    { medications: z.array(z.string()).describe('List of medication names') },
+    async ({ medications }) => {
+      const schedule = generateTimingSchedule(medications);
+      const foodInteractions = checkFoodInteractions(medications);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            schedule: {
+              'early_morning_empty_stomach': schedule.morning_empty.length > 0 ? schedule.morning_empty : undefined,
+              'morning_with_breakfast': schedule.morning_with_food.length > 0 ? schedule.morning_with_food : undefined,
+              'with_meals': schedule.with_meals.length > 0 ? schedule.with_meals : undefined,
+              'evening': schedule.evening.length > 0 ? schedule.evening : undefined,
+              'flexible_timing': schedule.anytime.length > 0 ? schedule.anytime : undefined
+            },
+            separationNotes: schedule.separationNotes,
+            foodWarnings: foodInteractions.filter(f => f.severity === 'major').map(f => `${f.drug}: ${f.recommendation}`),
+            disclaimer: CLINICAL_DISCLAIMER
+          }, null, 2)
+        }]
+      };
     }
   );
 }
