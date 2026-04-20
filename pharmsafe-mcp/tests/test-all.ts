@@ -2,6 +2,8 @@ import { findInteractions, findDuplicateTherapies } from '../src/drug-database.j
 import { checkPharmacogenomics } from '../src/pharmacogenomics.js';
 import { checkRenalDosing, checkHepaticDosing } from '../src/renal-hepatic.js';
 import { checkAllergies, findDeprescribingCandidates, generateSafetyReport } from '../src/safety-engine.js';
+import { checkBeersCriteria } from '../src/beers-criteria.js';
+import { checkHighAlertMedications, calculateAnticholinergicBurden } from '../src/high-alert.js';
 import { PatientContext, PatientGenotype } from '../src/types.js';
 
 let passed = 0;
@@ -140,6 +142,46 @@ console.log(`  Interactions: ${report.interactions.length}`);
 console.log(`  PGx Alerts: ${report.pgxAlerts.length}`);
 console.log(`  Renal Alerts: ${report.renalAlerts.length}`);
 console.log(`  Deprescribing: ${report.deprescribingCandidates.length}`);
+
+// Beers Criteria
+console.log('\nBeers Criteria:');
+const beers1 = checkBeersCriteria(['alprazolam', 'diphenhydramine', 'metformin'], 72);
+assert(beers1.avoidList.length >= 2, 'Flags alprazolam + diphenhydramine as Beers inappropriate');
+assert(beers1.avoidList.some(e => e.drug === 'alprazolam'), 'Identifies alprazolam by name');
+assert(beers1.avoidList.some(e => e.alternatives.length > 0), 'Provides alternatives for Beers drugs');
+
+const beers2 = checkBeersCriteria(['alprazolam', 'metformin'], 50);
+assert(beers2.avoidList.length === 0, 'Does not flag Beers for patients <65');
+
+const beers3 = checkBeersCriteria(['ibuprofen', 'oxybutynin'], 78, ['dementia', 'heart failure']);
+assert(beers3.diseaseDrug.length > 0, 'Detects disease-drug interaction: oxybutynin + dementia');
+
+// High-Alert Medications
+console.log('\nHigh-Alert Medications (ISMP):');
+const highAlert1 = checkHighAlertMedications(['warfarin', 'metformin', 'oxycodone']);
+assert(highAlert1.length === 3, 'Identifies all 3 high-alert meds');
+assert(highAlert1.every(h => h.safeguards.length > 0), 'All high-alert meds have safeguards');
+assert(highAlert1.every(h => h.monitoringRequired.length > 0), 'All have monitoring requirements');
+
+const highAlert2 = checkHighAlertMedications(['lisinopril', 'amlodipine']);
+assert(highAlert2.length === 0, 'Does not flag non-high-alert meds');
+
+const highAlert3 = checkHighAlertMedications(['lantus']);
+assert(highAlert3.length > 0, 'Detects insulin brand name (Lantus) as high-alert');
+
+// Anticholinergic Burden
+console.log('\nAnticholinergic Burden (ACB):');
+const acb1 = calculateAnticholinergicBurden(['oxybutynin', 'amitriptyline', 'diphenhydramine']);
+assert(acb1.totalScore >= 9, 'Three score-3 drugs = ACB ≥9');
+assert(acb1.riskLevel === 'high', 'Triple anticholinergic = high risk');
+
+const acb2 = calculateAnticholinergicBurden(['metformin', 'lisinopril']);
+assert(acb2.totalScore <= 2, 'Low-burden meds have low ACB');
+assert(acb2.riskLevel === 'low', 'Low ACB = low risk level');
+
+const acb3 = calculateAnticholinergicBurden(['paroxetine', 'sertraline', 'furosemide']);
+assert(acb3.totalScore > 0, 'Paroxetine (3) + sertraline (1) + furosemide (1) detected');
+assert(acb3.breakdown.length >= 3, 'All 3 meds in breakdown');
 
 // Summary
 console.log(`\n=== Results: ${passed} passed, ${failed} failed ===\n`);

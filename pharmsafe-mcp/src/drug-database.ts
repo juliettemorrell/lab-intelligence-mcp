@@ -270,6 +270,77 @@ export const DRUG_INTERACTIONS: DrugInteraction[] = [
     clinicalEffect: 'Trimethoprim blocks ENaC (like amiloride). Combined with spironolactone: severe hyperkalemia.',
     recommendation: 'Monitor potassium within 2-3 days. Short courses (<5d) with close monitoring may be acceptable. Consider alternative antibiotic.',
     evidenceLevel: 'established', references: ['CMAJ 2011', 'Antoniou et al. Arch Intern Med 2010']
+  },
+  // Additional high-frequency clinical interactions
+  {
+    drug1: 'fluoxetine', drug2: 'tramadol',
+    severity: 'major', mechanism: 'serotonergic-additive',
+    clinicalEffect: 'Serotonin syndrome risk. Fluoxetine also inhibits CYP2D6, paradoxically reducing tramadol efficacy while increasing seizure/serotonin risk.',
+    recommendation: 'Avoid combination. Use non-serotonergic analgesic.',
+    evidenceLevel: 'established', references: ['FDA MedWatch', 'Lexicomp']
+  },
+  {
+    drug1: 'methotrexate', drug2: 'trimethoprim',
+    severity: 'contraindicated', mechanism: 'pharmacodynamic-additive',
+    clinicalEffect: 'Both are folate antagonists. Combined use causes severe pancytopenia and potentially fatal bone marrow suppression.',
+    recommendation: 'AVOID combination. Use alternative antibiotic. If unavoidable, increase leucovorin rescue and monitor CBC closely.',
+    evidenceLevel: 'established', references: ['Multiple case reports of fatal pancytopenia', 'Lexicomp']
+  },
+  {
+    drug1: 'carbamazepine', drug2: 'clarithromycin',
+    severity: 'major', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Clarithromycin inhibits CYP3A4, causing carbamazepine toxicity (ataxia, diplopia, nystagmus, seizures paradoxically).',
+    recommendation: 'Use azithromycin instead (no CYP3A4 inhibition). If must use clarithromycin, reduce carbamazepine dose and monitor levels.',
+    evidenceLevel: 'established', references: ['FDA Label', 'Lexicomp']
+  },
+  {
+    drug1: 'amlodipine', drug2: 'simvastatin',
+    severity: 'moderate', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Amlodipine weakly inhibits CYP3A4, increasing simvastatin levels ~1.8x. Elevated myopathy risk.',
+    recommendation: 'Limit simvastatin to 20mg/day when combined with amlodipine. Or switch to atorvastatin/rosuvastatin.',
+    evidenceLevel: 'established', references: ['FDA Label — simvastatin dose limitations', 'ACC/AHA']
+  },
+  {
+    drug1: 'warfarin', drug2: 'amiodarone',
+    severity: 'major', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Amiodarone inhibits CYP2C9 and CYP3A4, increasing warfarin effect. INR may rise 40-50%. Interaction persists months after amiodarone discontinuation.',
+    recommendation: 'Reduce warfarin dose by 30-50% when starting amiodarone. Monitor INR weekly for several weeks. Effect lingers for months after amiodarone stopped.',
+    evidenceLevel: 'established', references: ['FDA Label', 'Lexicomp']
+  },
+  {
+    drug1: 'metformin', drug2: 'alcohol',
+    severity: 'major', mechanism: 'pharmacodynamic-additive',
+    clinicalEffect: 'Alcohol potentiates metformin-associated lactic acidosis by impairing hepatic lactate clearance. Hypoglycemia risk also increased.',
+    recommendation: 'Moderate alcohol use generally acceptable. Avoid binge drinking. Educate patient on lactic acidosis symptoms.',
+    evidenceLevel: 'probable', references: ['FDA Label', 'DeFronzo et al. NEJM']
+  },
+  {
+    drug1: 'potassium chloride', drug2: 'spironolactone',
+    severity: 'major', mechanism: 'pharmacodynamic-additive',
+    clinicalEffect: 'Potassium supplementation with potassium-sparing diuretic: life-threatening hyperkalemia.',
+    recommendation: 'Generally avoid concurrent use. If needed, monitor potassium within 3 days and weekly thereafter. Discontinue K supplement if K >5.0.',
+    evidenceLevel: 'established', references: ['Lexicomp', 'UpToDate']
+  },
+  {
+    drug1: 'sildenafil', drug2: 'nitroglycerin',
+    severity: 'contraindicated', mechanism: 'pharmacodynamic-synergistic',
+    clinicalEffect: 'PDE5 inhibitors potentiate nitrate vasodilation causing severe, potentially fatal hypotension.',
+    recommendation: 'CONTRAINDICATED. Do not administer nitrates within 24h of sildenafil (48h for tadalafil). Alternative: morphine for chest pain if needed.',
+    evidenceLevel: 'established', references: ['ACC/AHA Guidelines', 'FDA Black Box']
+  },
+  {
+    drug1: 'fluoxetine', drug2: 'tamoxifen',
+    severity: 'major', mechanism: 'pharmacokinetic-cyp-inhibition',
+    clinicalEffect: 'Fluoxetine is a strong CYP2D6 inhibitor. Blocks tamoxifen conversion to active metabolite endoxifen. May reduce breast cancer treatment efficacy.',
+    recommendation: 'Switch to SSRI with minimal CYP2D6 inhibition: citalopram, escitalopram, sertraline, or venlafaxine.',
+    evidenceLevel: 'established', references: ['NCCN Guidelines', 'Kelly et al. BMJ 2010']
+  },
+  {
+    drug1: 'prednisone', drug2: 'ibuprofen',
+    severity: 'moderate', mechanism: 'pharmacodynamic-additive',
+    clinicalEffect: 'Corticosteroids + NSAIDs: 2-4x increased GI ulceration and bleeding risk compared to either alone.',
+    recommendation: 'Add PPI gastroprotection if combination needed. Prefer shortest NSAID course. Monitor for GI symptoms.',
+    evidenceLevel: 'established', references: ['Piper et al. Ann Intern Med', 'Lexicomp']
   }
 ];
 

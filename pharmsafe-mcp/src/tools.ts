@@ -8,6 +8,9 @@ import { findInteractions, findDuplicateTherapies } from './drug-database.js';
 import { checkPharmacogenomics, getAffectedDrugs } from './pharmacogenomics.js';
 import { checkRenalDosing, checkHepaticDosing } from './renal-hepatic.js';
 import { checkAllergies, findDeprescribingCandidates, generateSafetyReport } from './safety-engine.js';
+import { checkBeersCriteria } from './beers-criteria.js';
+import { checkHighAlertMedications, calculateAnticholinergicBurden } from './high-alert.js';
+import { fetchPatientData } from './fhir-client.js';
 
 const MedicationSchema = z.object({
   name: z.string(),
@@ -408,6 +411,142 @@ export function registerTools(server: McpServer): void {
           }, null, 2)
         }]
       };
+    }
+  );
+
+  server.tool(
+    'check_beers_criteria',
+    'Check medications against AGS Beers Criteria 2023 for potentially inappropriate medications in older adults (≥65). Includes disease-drug interactions specific to geriatric conditions.',
+    {
+      medications: z.array(z.string()).describe('List of medication names'),
+      age: z.number().describe('Patient age (Beers applies to ≥65)'),
+      conditions: z.array(z.string()).optional().describe('Active conditions (dementia, falls history, heart failure, CKD, etc.)')
+    },
+    async ({ medications, age, conditions }) => {
+      const results = checkBeersCriteria(medications, age, conditions);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            patientAge: age,
+            beersApplicable: age >= 65,
+            inappropriateMedications: results.avoidList.length,
+            diseaseDrugConflicts: results.diseaseDrug.length,
+            avoidList: results.avoidList.map(e => ({
+              drug: e.drug,
+              category: e.category,
+              rationale: e.rationale,
+              recommendation: e.recommendation,
+              alternatives: e.alternatives,
+              evidenceQuality: e.qualityOfEvidence,
+              recommendationStrength: e.strengthOfRecommendation
+            })),
+            diseaseDrugInteractions: results.diseaseDrug,
+            disclaimer: CLINICAL_DISCLAIMER
+          }, null, 2)
+        }]
+      };
+    }
+  );
+
+  server.tool(
+    'check_high_alert',
+    'Identify ISMP high-alert medications that require extra safeguards. Returns required monitoring, safety protocols, and risk factors.',
+    { medications: z.array(z.string()).describe('List of medication names') },
+    async ({ medications }) => {
+      const results = checkHighAlertMedications(medications);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            medicationsChecked: medications.length,
+            highAlertFound: results.length,
+            medications: results.map(r => ({
+              drug: r.drug,
+              category: r.category,
+              risks: r.risks,
+              requiredSafeguards: r.safeguards,
+              monitoringRequired: r.monitoringRequired
+            })),
+            disclaimer: CLINICAL_DISCLAIMER
+          }, null, 2)
+        }]
+      };
+    }
+  );
+
+  server.tool(
+    'calculate_anticholinergic_burden',
+    'Calculate total Anticholinergic Cognitive Burden (ACB) score for a medication list. High ACB (≥3) is associated with cognitive decline and delirium in elderly.',
+    { medications: z.array(z.string()).describe('List of medication names') },
+    async ({ medications }) => {
+      const result = calculateAnticholinergicBurden(medications);
+
+      return {
+        content: [{
+          type: 'text' as const,
+          text: JSON.stringify({
+            totalACBScore: result.totalScore,
+            riskLevel: result.riskLevel,
+            interpretation: result.interpretation,
+            breakdown: result.breakdown.sort((a, b) => b.score - a.score),
+            disclaimer: CLINICAL_DISCLAIMER
+          }, null, 2)
+        }]
+      };
+    }
+  );
+
+  server.tool(
+    'pull_patient_medications',
+    'Pull patient medication list, allergies, and relevant labs from a connected FHIR EHR server. Requires SHARP context (FHIR server URL, access token, patient ID).',
+    {
+      fhirServerUrl: z.string().describe('FHIR R4 server base URL'),
+      accessToken: z.string().describe('OAuth2 access token for FHIR server'),
+      patientId: z.string().describe('FHIR Patient resource ID')
+    },
+    async ({ fhirServerUrl, accessToken, patientId }) => {
+      try {
+        const data = await fetchPatientData({ serverUrl: fhirServerUrl, accessToken, patientId });
+
+        return {
+          content: [{
+            type: 'text' as const,
+            text: JSON.stringify({
+              source: 'FHIR EHR',
+              fhirServer: fhirServerUrl,
+              patientId,
+              patientAge: data.age,
+              patientSex: data.sex,
+              medicationCount: data.medications.length,
+              medications: data.medications,
+              allergyCount: data.allergies.length,
+              allergies: data.allergies,
+              renalFunction: data.renalFunction,
+              hepaticFunction: data.hepaticFunction,
+              note: 'Use this data with other PharmSafe tools (check_interactions, assess_polypharmacy, etc.) for comprehensive safety analysis.'
+            }, null, 2)
+          }]
+        };
+      } catch (error: any) {
+        return {
+          content: [{
+            type: 'text' as const,
+            text: JSON.stringify({
+              error: 'Failed to fetch patient data from FHIR server',
+              details: error.message,
+              troubleshooting: [
+                'Verify FHIR server URL is correct and accessible',
+                'Check that access token is valid and not expired',
+                'Confirm patient ID exists on the server',
+                'Ensure token has read access to MedicationRequest, AllergyIntolerance, Observation, Patient'
+              ]
+            }, null, 2)
+          }]
+        };
+      }
     }
   );
 }
