@@ -66,7 +66,10 @@ app.get('/health', (_req, res) => {
       'check_beers_criteria',
       'check_high_alert',
       'calculate_anticholinergic_burden',
-      'pull_patient_medications'
+      'pull_patient_medications',
+      'check_food_interactions',
+      'check_timing_conflicts',
+      'generate_timing_schedule'
     ],
     timestamp: new Date().toISOString()
   });

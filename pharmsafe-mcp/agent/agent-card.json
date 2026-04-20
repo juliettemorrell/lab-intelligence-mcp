@@ -49,6 +49,24 @@
       "name": "Allergy & Cross-Reactivity Check",
       "description": "Cross-reference medications against patient allergies including class-level cross-reactivity detection",
       "tags": ["allergy", "cross-reactivity", "patient-safety"]
+    },
+    {
+      "id": "food-interactions",
+      "name": "Drug-Food Interaction Check",
+      "description": "Identify clinically significant drug-food interactions including grapefruit, dairy, vitamin K, tyramine, and alcohol",
+      "tags": ["drug-food", "grapefruit", "administration"]
+    },
+    {
+      "id": "timing-schedule",
+      "name": "Medication Timing & Scheduling",
+      "description": "Generate optimal daily medication schedule with timing separation requirements and food-timing guidance",
+      "tags": ["medication-timing", "scheduling", "administration", "patient-education"]
+    },
+    {
+      "id": "anticholinergic-burden",
+      "name": "Anticholinergic Burden Scoring",
+      "description": "Calculate total Anticholinergic Cognitive Burden (ACB) score with risk stratification for cognitive decline",
+      "tags": ["anticholinergic", "cognitive", "ACB", "geriatrics"]
     }
   ],
   "defaultInputModes": ["text"],

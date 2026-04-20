@@ -14,7 +14,7 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 
 ## The Solution
 
-15 MCP tools that provide comprehensive medication safety analysis:
+18 MCP tools that provide comprehensive medication safety analysis:
 
 | Category | What it catches |
 |----------|----------------|
@@ -29,6 +29,9 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 | Allergy cross-reactivity | 13 drug class cross-reactivity maps |
 | Deprescribing | 7 candidates with evidence-based taper schedules |
 | Medication reconciliation | Cross-source discrepancy detection |
+| Drug-food interactions | Grapefruit, dairy, vitamin K, tyramine, alcohol, potassium |
+| Timing conflicts | Medications requiring temporal separation |
+| Medication scheduling | Optimal daily timing with food/separation constraints |
 | FHIR EHR pull | Direct medication/allergy/lab extraction from connected EHR |
 
 ## Architecture
@@ -46,7 +49,7 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 | Clinical narrative | LLM (platform) | Natural language explanations |
 | Treatment decisions | Clinician | Human-in-the-loop always |
 
-## MCP Tools (15)
+## MCP Tools (18)
 
 ### Safety Checks
 - `check_interactions` — Drug-drug interaction detection with severity and mechanisms
@@ -64,6 +67,11 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 - `calculate_anticholinergic_burden` — ACB scoring with risk interpretation
 - `deprescribing_opportunities` — Evidence-based deprescribing with taper schedules
 - `medication_reconciliation` — Cross-source medication list comparison
+
+### Administration & Scheduling
+- `check_food_interactions` — Drug-food interaction detection (grapefruit, dairy, vitamin K, etc.)
+- `check_timing_conflicts` — Temporal separation requirements between co-administered drugs
+- `generate_timing_schedule` — Optimal daily medication schedule with all constraints resolved
 
 ### Reference & EHR
 - `pgx_drug_lookup` — Look up drugs affected by a specific genotype result
