@@ -18,7 +18,7 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 
 | Category | What it catches |
 |----------|----------------|
-| Drug interactions | 22 clinically significant pairs with severity ranking and mechanisms |
+| Drug interactions | 25+ clinically significant pairs with severity ranking and mechanisms |
 | Pharmacogenomics | 14 drugs × 6 gene panels (CYP2D6, CYP2C19, CYP2C9, CYP3A5, DPYD, SLCO1B1) |
 | Renal dosing | GFR-based adjustments for 8 high-risk drugs |
 | Hepatic dosing | Child-Pugh-based adjustments for 6 drugs |
@@ -79,6 +79,18 @@ Current EHR drug interaction alerts are noisy (>90% overridden) and miss the nua
 - `pgx_drug_lookup` — Look up drugs affected by a specific genotype result
 - `pull_patient_medications` — FHIR R4 EHR integration via SHARP context
 
+## Input Robustness
+
+PharmSafe handles real-world medication inputs, not just clean generic names:
+
+- **200+ brand→generic mappings** (Coumadin→warfarin, Lipitor→atorvastatin, Tums→calcium carbonate, etc.)
+- **OTC brands** recognized (Advil, Aleve, Tums, Pepto-Bismol, Mucinex, Sudafed, Flonase, etc.)
+- **Dose/frequency stripping** ("Metformin 1000mg BID" → "metformin")
+- **Formulation removal** (XR, SR, ER, capsule, tablet, etc.)
+- **Case insensitive** (WARFARIN, Warfarin, warfarin all work)
+- **Word-boundary matching** prevents false positives (aspirin ≠ lisinopril)
+- **Deduplication** across all checkers (same drug as brand+generic counted once)
+
 ## Clinical Evidence Base
 
 - **Drug Interactions**: FDA safety communications, Lexicomp, CredibleMeds
@@ -97,7 +109,7 @@ cd pharmsafe-mcp
 npm install
 npm run dev          # HTTP server on port 3001
 npm run dev:stdio    # stdio transport for MCP clients
-npm test             # Run 49 test assertions
+npm test             # Run 190 test assertions (59 unit + 21 integration + 110 stress)
 ```
 
 ## Deployment

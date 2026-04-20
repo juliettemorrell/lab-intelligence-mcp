@@ -254,6 +254,34 @@ export const BRAND_TO_GENERIC: Record<string, string> = {
   'horizant': 'gabapentin',
   'lyrica': 'pregabalin',
   'topamax': 'topiramate',
+  // OTC / Supplements
+  'tums': 'calcium carbonate',
+  'caltrate': 'calcium carbonate',
+  'os-cal': 'calcium carbonate',
+  'oscal': 'calcium carbonate',
+  'citracal': 'calcium citrate',
+  'slow-mag': 'magnesium oxide',
+  'pepto-bismol': 'bismuth subsalicylate',
+  'pepto bismol': 'bismuth subsalicylate',
+  'kaopectate': 'bismuth subsalicylate',
+  'miralax': 'polyethylene glycol',
+  'dulcolax': 'bisacodyl',
+  'senokot': 'senna',
+  'colace': 'docusate',
+  'metamucil': 'psyllium',
+  'benefiber': 'wheat dextrin',
+  'gas-x': 'simethicone',
+  'gas x': 'simethicone',
+  'mylicon': 'simethicone',
+  'dramamine': 'dimenhydrinate',
+  'mucinex': 'guaifenesin',
+  'robitussin': 'dextromethorphan',
+  'delsym': 'dextromethorphan',
+  'sudafed': 'pseudoephedrine',
+  'flonase': 'fluticasone',
+  'nasacort': 'triamcinolone',
+  'nasonex': 'mometasone',
+  'afrin': 'oxymetazoline',
   // Allergies
   'benadryl': 'diphenhydramine',
   'claritin': 'loratadine',
@@ -395,7 +423,9 @@ export function normalizeMedName(input: string): string {
     'vitamin d', 'vitamin b12', 'folic acid', 'iodinated contrast',
     'amoxicillin-clavulanate', 'trimethoprim-sulfamethoxazole',
     'fluticasone-salmeterol', 'fluticasone-vilanterol', 'budesonide-formoterol',
-    'isosorbide mononitrate', 'isosorbide dinitrate', 'desiccated thyroid'];
+    'isosorbide mononitrate', 'isosorbide dinitrate', 'desiccated thyroid',
+    'bismuth subsalicylate', 'polyethylene glycol', 'magnesium oxide',
+    'wheat dextrin', 'calcium citrate'];
 
   for (const known of knownMultiWord) {
     if (name.includes(known)) return known;

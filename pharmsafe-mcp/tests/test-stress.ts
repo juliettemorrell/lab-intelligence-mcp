@@ -68,6 +68,18 @@ assert(normalizeMedName('calcium carbonate 1200mg') === 'calcium carbonate', 'Mu
 assert(normalizeMedName('Potassium Chloride') === 'potassium chloride', 'Potassium chloride preserved');
 assert(normalizeMedName('Ferrous Sulfate 325mg') === 'ferrous sulfate', 'Ferrous sulfate preserved');
 
+// OTC brand names
+assert(normalizeMedName('Tums') === 'calcium carbonate', 'Tums → calcium carbonate');
+assert(normalizeMedName('Pepto-Bismol') === 'bismuth subsalicylate', 'Pepto-Bismol → bismuth subsalicylate');
+assert(normalizeMedName('Miralax') === 'polyethylene glycol', 'Miralax → polyethylene glycol');
+assert(normalizeMedName('Sudafed') === 'pseudoephedrine', 'Sudafed → pseudoephedrine');
+assert(normalizeMedName('Mucinex 600mg') === 'guaifenesin', 'Mucinex 600mg → guaifenesin');
+assert(normalizeMedName('Colace 100mg BID') === 'docusate', 'Colace 100mg BID → docusate');
+assert(normalizeMedName('Flonase') === 'fluticasone', 'Flonase → fluticasone');
+assert(normalizeMedName('Gas-X') === 'simethicone', 'Gas-X → simethicone');
+assert(normalizeMedName('Dulcolax') === 'bisacodyl', 'Dulcolax → bisacodyl');
+assert(normalizeMedName('Caltrate 600mg') === 'calcium carbonate', 'Caltrate 600mg → calcium carbonate');
+
 // XL/SR/ER variants
 assert(normalizeMedName('Wellbutrin XL') === 'bupropion', 'Wellbutrin XL → bupropion');
 assert(normalizeMedName('Metoprolol XL 50mg') === 'metoprolol', 'Metoprolol XL → metoprolol');
@@ -117,6 +129,19 @@ assert(mixedCase.some(i =>
   (i.drug1 === 'lisinopril' && i.drug2 === 'naproxen') ||
   (i.drug1 === 'naproxen' && i.drug2 === 'lisinopril')
 ), 'Mixed case detects lisinopril + naproxen');
+
+// Warfarin + ibuprofen (critical real-world pair)
+const warfIbu = findInteractions(['warfarin', 'ibuprofen']);
+assert(warfIbu.length > 0, 'Warfarin + ibuprofen detected');
+assert(warfIbu[0].severity === 'major', 'Warfarin + ibuprofen is major severity');
+
+// Aspirin + ibuprofen (FDA advisory)
+const aspIbu = findInteractions(['aspirin', 'ibuprofen']);
+assert(aspIbu.length > 0, 'Aspirin + ibuprofen detected (FDA advisory)');
+
+// Brand names: Coumadin + Advil
+const brandWarfIbu = findInteractions(['Coumadin 5mg daily', 'Advil 400mg PRN']);
+assert(brandWarfIbu.length > 0, 'Coumadin + Advil brand names detect warfarin+ibuprofen interaction');
 
 // No duplicate interactions
 const dupeCheck = findInteractions(['warfarin 5mg', 'Coumadin 5mg']);
@@ -295,8 +320,8 @@ assert(uniqueFood.filter(f => f.food.includes('grapefruit')).length === 1, 'No d
 console.log('\n12. Timing Conflicts:');
 
 const brandTiming = checkTimingConflicts(['Synthroid 100mcg', 'Tums 500mg']);
-// Tums contains calcium carbonate but normalizer won't map Tums...
-// This is OK — we test with standard names
+assert(brandTiming.length > 0, 'Synthroid + Tums (OTC brand) timing conflict detected');
+
 const timingStd = checkTimingConflicts(['Synthroid', 'calcium carbonate']);
 assert(timingStd.length > 0, 'Synthroid + calcium timing conflict detected');
 
@@ -360,6 +385,12 @@ assert(formatted.markdown.includes('## 📊 Risk Scorecard'), 'Report has risk s
 assert(formatted.summary.totalFindings > 0, 'Summary has findings count');
 assert(formatted.priorityActions.critical.length + formatted.priorityActions.high.length > 0,
   'Real patient has priority actions');
+
+// Report should not truncate food names to just "vitamin"
+assert(!formatted.markdown.includes('avoid vitamin.'), 'Food interactions not truncated to just "vitamin"');
+// Verify the full food category appears (not just first word)
+const hasFullFoodName = formatted.markdown.includes('vitamin K-rich foods') || formatted.markdown.includes('grapefruit');
+assert(hasFullFoodName, 'Food categories display full name (not truncated)');
 
 console.log(`\n  Real-world patient: ${formatted.summary.totalFindings} findings, ${formatted.summary.criticalActions} critical`);
 console.log(`  Risk: ${formatted.summary.riskLevel}`);

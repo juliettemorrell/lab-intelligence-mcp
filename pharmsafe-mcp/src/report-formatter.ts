@@ -109,10 +109,11 @@ export function formatSafetyReport(patient: PatientContext, report: SafetyReport
   }
 
   for (const fi of foodInteractions) {
+    const foodShort = fi.food.includes('(') ? fi.food.split('(')[0].trim() : fi.food.split(',')[0].trim();
     if (fi.severity === 'major') {
-      high.push(`**FOOD**: ${fi.drug} — avoid ${fi.food.split(' ')[0]}.`);
+      high.push(`**FOOD**: ${fi.drug} — avoid ${foodShort}. ${fi.recommendation.split('.')[0]}.`);
     } else {
-      moderate.push(`**FOOD**: ${fi.drug} + ${fi.food.split(',')[0]} — ${fi.recommendation.split('.')[0]}.`);
+      moderate.push(`**FOOD**: ${fi.drug} + ${foodShort} — ${fi.recommendation.split('.')[0]}.`);
     }
   }
 

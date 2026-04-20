@@ -176,6 +176,27 @@ export const DRUG_INTERACTIONS: DrugInteraction[] = [
     evidenceLevel: 'established', references: ['CHEST Guidelines', 'AHA/ACC']
   },
   {
+    drug1: 'warfarin', drug2: 'ibuprofen',
+    severity: 'major', mechanism: 'bleeding-risk-additive',
+    clinicalEffect: 'NSAIDs increase GI bleeding risk 6-fold with warfarin. Ibuprofen also inhibits platelets and may displace warfarin from albumin binding.',
+    recommendation: 'Avoid combination. Use acetaminophen for pain. If NSAID essential, shortest course with PPI gastroprotection. Monitor INR within 3-5 days.',
+    evidenceLevel: 'established', references: ['CHEST Guidelines', 'FDA Label', 'Lexicomp']
+  },
+  {
+    drug1: 'aspirin', drug2: 'ibuprofen',
+    severity: 'moderate', mechanism: 'pharmacodynamic-antagonistic',
+    clinicalEffect: 'Ibuprofen blocks aspirin binding to COX-1 platelet site, reducing cardioprotective antiplatelet effect. FDA scientific advisory.',
+    recommendation: 'Take aspirin 30 min BEFORE ibuprofen or 8h AFTER. If chronic NSAID needed, consider naproxen (less interaction) or celecoxib.',
+    evidenceLevel: 'established', references: ['FDA Science Advisory 2006', 'Catella-Lawson et al. NEJM 2001']
+  },
+  {
+    drug1: 'apixaban', drug2: 'ibuprofen',
+    severity: 'major', mechanism: 'bleeding-risk-additive',
+    clinicalEffect: 'NSAIDs + DOACs: 2-4x increased GI bleeding risk. Ibuprofen impairs platelet function additively.',
+    recommendation: 'Avoid chronic NSAID use. Use acetaminophen or topical NSAIDs. If short-term, add PPI gastroprotection.',
+    evidenceLevel: 'established', references: ['European Heart Journal 2015', 'Lexicomp']
+  },
+  {
     drug1: 'apixaban', drug2: 'naproxen',
     severity: 'major', mechanism: 'bleeding-risk-additive',
     clinicalEffect: 'NSAIDs increase GI bleeding risk 2-4x with DOACs. Also impair platelet function.',
